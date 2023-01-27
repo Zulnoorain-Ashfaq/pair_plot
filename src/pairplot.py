@@ -73,7 +73,6 @@ def make_pair_plot(
 
     # automatically converting categorical cols to numerical
     if convert_categorical:
-        label_dict = {}
         # selecting all cols except numeric types
         cat_cols = cat_cols.union(df.select_dtypes(exclude=numeric_dtypes).columns)
         for cat_col in cat_cols:
