@@ -1,5 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+from tqdm import tqdm
 import seaborn as sns
 from typing import Union, Tuple, List
 
@@ -7,6 +8,8 @@ from typing import Union, Tuple, List
 # %%
 def make_pair_plot(
         df: pd.DataFrame,
+        frac: float = 0.5,
+        n: int = None,
         convert_categorical: bool = False,
         categories_boundary: int = None,
         label_dict=None,
@@ -24,6 +27,8 @@ def make_pair_plot(
 
     Parameters:
     :param df: pandas dataframe
+    :param frac: fraction of dataset to use
+    :param n: number of records to use
     :param convert_categorical: it will automatically convert non-numeric columns to categorical-columns
     :param categories_boundary: convert numeric categorical columns to categorical
     :param label_dict: dictionary containing mapping of the categorical columns
@@ -52,7 +57,7 @@ def make_pair_plot(
         showing plot
     """
     # creating a copy of the dataframe
-    df = df.copy()
+    df = df.sample(n=n,frac=frac)
 
     # initializing label_dictionary for categorical values
     if label_dict is None:
@@ -92,6 +97,7 @@ def make_pair_plot(
 
     if verbose:
         print("Categorical columns =", cat_cols)
+        pbar = tqdm(range(len(columns)**2))
 
     # making a fig suitable for plot_number of columns
     fig_size = (8 * len(columns), 8 * len(columns)) if fig_size is None else fig_size
@@ -103,7 +109,6 @@ def make_pair_plot(
         title if title is not None else "PAIR PLOT", fontsize=title_size * len(columns)
     )
 
-    plot_number = 1
     # running loop for every col as a row
     for row, rx in zip(columns, ax):
         # running loop for every col as a column
@@ -171,9 +176,7 @@ def make_pair_plot(
                 cx.set(xlabel=col, ylabel=row)
             # showing processes info if required
             if verbose:
-                print(f"Done plot {plot_number}/{len(columns) * len(columns)}")
-            # increasing the number of plots drawn
-            plot_number += 1
+                pbar.update()
     if save_path:
         print(f"saving plot as {save_path}")
         plt.savefig(save_path, dpi=300)
